@@ -1,0 +1,6 @@
+{
+  "name": "kinsmith-site",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Static build of the Kinsmith character system demo"
+}

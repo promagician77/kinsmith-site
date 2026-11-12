@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><link rel="icon" href="data:,"><title>Kinsmith: build notes and measurements</title><style>
+@font-face { font-family: 'Archivo'; src: url('assets/archivo-latin-wdth-normal-DY7AcnAa.woff2') format('woff2'); font-weight: 100 900; font-stretch: 62% 125%; }
+:root { --ink:#16181b; --muted:#565c64; --line:#c6cbd2; --paper:#eceef1; --brass:#9a6a16; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Archivo', system-ui, sans-serif; color: var(--ink); background: var(--paper); line-height: 1.5; font-size: 15px; }
+main { max-width: 980px; margin: 0 auto; padding: 40px 24px 64px; }
+h1 { font-size: 34px; line-height: 1.05; margin: 0 0 8px; font-weight: 820; font-stretch: 125%; }
+h2 { font-size: 19px; margin: 36px 0 10px; font-weight: 700; }
+p.lede { font-size: 17px; max-width: 64ch; color: #2b2f35; margin: 0; }
+a { color: var(--ink); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 10px 9px 0; border-top: 1px solid var(--line); }
+th { font-size: 12px; color: var(--muted); font-weight: 650; font-stretch: 88%; }
+td:first-child { font-weight: 650; width: 21%; }
+td:last-child { color: var(--muted); width: 22%; font-stretch: 90%; }
+ul { padding-left: 20px; max-width: 72ch; }
+li { margin: 4px 0; }
+.how { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px 28px; }
+.how h3 { margin: 0 0 4px; font-size: 15px; }
+.how p { margin: 0; color: #2b2f35; font-size: 14px; }
+pre { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; overflow-x: auto; font-size: 13px; }
+figure { margin: 22px 0 0; }
+figure img { width: 100%; display: block; border-radius: 6px; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.back { display: inline-block; margin-bottom: 22px; font-weight: 600; }
+</style></head><body><main>
+<a class="back" href="./">Back to the character system</a>
+<h1>Build notes</h1>
+<p class="lede">Kinsmith is a working model of the system the brief describes: five races and two body types on one skeleton, swappable clothing and armour, palette textures, six animations and glTF export. Every number below comes from an automated run against this build.</p>
+<figure><img src="lineup.png" alt="Ten characters, five races in both body types, wearing the same villager outfit in A-pose"><figcaption>Ten bodies, one outfit, one skeleton. Each figure is one mesh and one draw call.</figcaption></figure>
+<h2>Measured</h2><table><thead><tr><th>Check</th><th>Result</th><th>How it was measured</th></tr></thead><tbody><tr><td>Unit tests</td><td>11 of 11 pass</td><td>Vitest, tests/char.test.ts</td></tr><tr><td>One body topology</td><td>1 vertex order across 60 bodies per detail level (5 races × 2 body types × 3 heights × 2 builds). LOD0 body 1,094 vertices, 2,084 triangles; LOD1 624 and 1,184</td><td>Hash of the body index buffer</td></tr><tr><td>Dressed triangle counts</td><td>LOD0 2,477–3,596 (median 3,077); LOD1 1,419–2,156</td><td>10 bodies × 6 outfits per level</td></tr><tr><td>Skin weights</td><td>0 invalid across 240,834 vertices in 120 builds (at most 4 bones, weights sum to 1)</td><td>Every vertex checked</td></tr><tr><td>Clothing follows the body</td><td>69,600 fitted clothing points carry exactly the weights of the body point beneath them: 0 mismatches</td><td>Pairwise comparison</td></tr><tr><td>Hidden faces under clothing</td><td>Knight removes 2,184–2,224 triangles, villager 1,200–1,240, base mesh 64–104</td><td>Faces fully covered by an outer layer</td></tr><tr><td>Animation clips</td><td>6 clips, 26 tracks each, 0 tracks that fail to bind, every loop closes (largest seam 5e-17)</td><td>Track names checked against the 28 bones</td></tr><tr><td>Same clips on every race</td><td>150 of 156 exported tracks are the same objects for a human and a dwarf; only Root height differs (up to 4.87 cm)</td><td>Object identity of exported tracks</td></tr><tr><td>Feet on the floor</td><td>Lowest point stays between -0.59 and +0.2 cm over 2,880 frames (30 bodies × 6 clips × 16 frames). Without grounding it reached -8.27 cm</td><td>CPU skinning of every frame</td></tr><tr><td>Hands entering the body</td><td>0 mm in all 2,880 frames</td><td>Hand vertices against torso and thighs</td></tr><tr><td>Clothing staying outside</td><td>5 of 6 clips never put a fitted clothing point inside its body point. Run: deepest knee bend folds 66 point-frames up to 3.31 mm into the knee crease</td><td>Signed distance along the body normal</td></tr><tr><td>glTF export</td><td>6 files (4 races, both detail levels): 0 errors, 0 warnings, 0 infos in the Khronos glTF Validator. Each has 1 mesh, 28 joints, 1 material, 1 image, 6 animations, 304–393 KB</td><td>gltf-validator 2.0.0-dev.3.10</td></tr><tr><td>Export reloads and plays</td><td>Every file reloads in three.js with 28 joints and 6 clips; Walk moves the left foot 20.7–32.4 cm</td><td>GLTFLoader round trip</td></tr><tr><td>Draw calls</td><td>1 per character: 2, 11 and 36 including the floor disc, for 1, 10 and 35 characters</td><td>renderer.info in the browser</td></tr><tr><td>Build speed</td><td>Median 3.79 ms per character in Node; in the browser median 5.8 ms, slowest 22.3 ms over 60 race, body and outfit switches</td><td>performance.now()</td></tr><tr><td>Animation load</td><td>35 animated characters: clips, grounding and bone matrices take 0.5 ms median on the CPU; whole-frame CPU 2.9 ms median</td><td>Software WebGL; GPU time not included</td></tr><tr><td>Recolouring</td><td>Repaints the 64×32 atlas; geometry object unchanged (same UUID)</td><td>Geometry UUID before and after</td></tr><tr><td>Accessibility and layout</td><td>axe-core: 0 violations in 5 scans; arrow keys move between tabs; 5 of 5 viewport sizes without horizontal overflow</td><td>axe-core 4.14, Playwright</td></tr><tr><td>Download size</td><td>742 KB of JavaScript before compression</td><td>Vite production build</td></tr></tbody></table>
+<h2>Not measured</h2><ul><li>Frames per second on real GPUs, phones or consoles (only software WebGL here)</li><li>Import into Unity, Unreal or Godot: files pass the Khronos validator and reload in three.js, nothing more</li><li>How closely it matches your reference sheets: this demo is generated in code; production meshes would be modelled to your references</li><li>Facial rig, expression blend shapes, cloth or hair simulation</li><li>Engine-side foot IK (grounding here is a root height offset)</li><li>Long hair, capes and robe skirts against the legs during animation (checked by eye only)</li><li>Normal maps, hand-painted detail or PBR textures beyond flat palette colours</li><li>Lighthouse scores</li></ul>
+<h2>How it holds together</h2><div class="how"><div><h3>One skeleton</h3><p>28 bones with the same names and rest pose for every race and body type, including hand sockets for weapons. Only bone positions change.</p></div><div><h3>One body topology</h3><p>Torso, limbs, hands, feet and head are rings with fixed counts. Race, sex and sliders move the rings but never add or remove vertices, so UVs, weights and clothing carry over.</p></div><div><h3>Clothing as shells</h3><p>Fitted pieces copy the body rings they cover, pushed out by a layer offset (base layer, cloth, leather, plate) and keep the same weights, so they bend exactly with the body.</p></div><div><h3>Hidden faces</h3><p>Each piece records the span it covers. Body faces and lower layers fully under it are removed instead of fighting through.</p></div><div><h3>One colour atlas</h3><p>Every vertex samples one cell of a 64×32 texture. A recolour repaints the canvas: one mesh, one material, one draw call per character.</p></div><div><h3>Shared clips</h3><p>Six clips (Idle, Walk, Run, Wave, Attack, Cast) are bone rotations plus Root height. The viewer keeps feet on the floor each frame; export bakes that height into the body’s own Root track.</p></div></div>
+<h2>Run the checks yourself</h2>
+<pre>npm ci
+npm test                      # unit tests
+npx tsx tools/measure.ts      # geometry and animation report -> out/measure.json
+npm run build && npx vite preview --port 5180
+node tools/qa.mjs http://localhost:5180   # export, validator, draw calls, axe, layouts</pre>
+<h2>Sources</h2><ul>
+<li><a href="https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html">glTF 2.0 specification</a> (skins, animation channels, flat normals when none are given)</li>
+<li><a href="https://github.com/KhronosGroup/glTF-Validator">Khronos glTF Validator</a></li>
+<li><a href="https://threejs.org/">three.js</a> (renderer, AnimationMixer, GLTFExporter and GLTFLoader)</li>
+</ul>
+</main></body></html>

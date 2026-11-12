@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Modular low-poly fantasy character system: five races, two body types, one shared rig, swappable clothing and armour, palette textures, six animations, glTF export.">
+  <link rel="icon" href="data:,">
+  <title>Kinsmith: modular character system</title>
+  <script type="module" crossorigin src="./assets/main-D7jyI0l-.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/main-CJWYkjrJ.css">
+</head>
+<body>
+  <div class="app">
+    <main class="stage" id="stage">
+      <canvas id="view" role="img" aria-label="3D view of the current character"></canvas>
+      <header class="brand">
+        <h1>Kinsmith</h1>
+        <p id="tagline">One rig, five races, every outfit.</p>
+      </header>
+      <div class="views" role="radiogroup" aria-label="View">
+        <button type="button" role="radio" data-view="single" aria-checked="true">Character</button>
+        <button type="button" role="radio" data-view="lineup" aria-checked="false">Lineup</button>
+        <button type="button" role="radio" data-view="crowd" aria-checked="false">Crowd</button>
+      </div>
+      <p class="caption" id="caption" hidden></p>
+      <div class="labels" id="labels" aria-hidden="true"></div>
+      <div class="motion" role="toolbar" aria-label="Animation" id="motion"></div>
+      <div class="stats" id="stats" aria-live="polite"></div>
+      <div class="loading" id="loading" role="status">Building characters</div>
+    </main>
+    <aside class="panel" aria-label="Character controls">
+      <div class="tabs" role="tablist" aria-label="Control groups" id="tabs"></div>
+      <div id="panels"></div>
+      <footer class="foot"><a href="notes.html">Build notes and measurements</a></footer>
+    </aside>
+  </div>
+</body>
+</html>
